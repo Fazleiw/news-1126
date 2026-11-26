@@ -5,19 +5,20 @@ Gate: `CHECK=1 node design/build.mjs && bash design/render.sh && bash design/che
 | Check | Result |
 |---|---|
 | CLIP / OFF BAND / OVERLAP / OFF PAGE / PINS | none |
-| Band slack (px) | head 0 · deck 0 · leads 0 · seconds 0 · low 0 · foot 0 |
-| Inner room (min, px) | lead 3 · card text 3 · map col 0 · digest col 0 |
-| Font sizes (px) | 15, 16, 17, 18, 19, 21, 25, 34, 96 |
-| Min font | 15 px |
-| Deterministic | two builds of `design/atlas.html`: `cmp` identical (sha1 2e51387174801be706c07a089884884d190bc32f) |
-| `entry.png` | 1024 × 1024, 368,251 bytes (limit 1,048,576), CRCs verified by `main.ts` |
+| Band slack (px) | head 0 · deck 0 · anchors 0 · leads 0 · seconds 0 · low 0 · foot 0 |
+| Inner room (min, px) | lead 0 · card text 3 · map col 0 · digest col 0 |
+| Reading font sizes (px) | 15, 16, 17, 18, 19, 21, 25, 34, 96 — min 15 |
+| Label font | 11 px: status chips and source credits only (the one exception to the 15 px floor) |
+| Deterministic | two builds of `design/atlas.html`: `cmp` identical (sha1 add341970f389c830020e6ffa01e1e903596da75) |
+| `entry.png` | 1024 × 1024, 387,353 bytes (limit 1,048,576), CRCs verified by `main.ts` |
 | Stories | 36: 4 leads (rows 1–4), 8 cards (5–12), 24 briefs (13–36); chip number = sources.md row |
-| Map | 12 numbered pins, 20 dots; 16, 19, 22, 30 have no single place and no dot |
-| Legend | Europe 9, Middle East 8, Asia 7, Africa 6, Americas 3, Oceania 1, World 2 = 36 |
+| Status chips | on all 12 leads and cards, from the row's code: CONFIRMED 5 (1, 2, 4, 8, 12) · REPORTED 5 (3, 5, 9, 10, 11) · CLAIM 1 (6) · ONGOING 1 (7) |
+| Map | 12 numbered pins, 22 dots; 20 and 33 have no single place and no dot |
+| Legend | Europe 11, Middle East 7, Asia 6, Africa 5, Americas 4, Oceania 1, World 2 = 36 |
 
-## Engine changes from the 25 November renderer
+## Layout changes in pass 3
 
-- Map crop widened to 104°W–174°E, 63°N–50°S (map 304 × 140, was 304 × 135) so Middletown, Iowa (9) and Southland, NZ (35) are on it.
-- `ringPath` unwraps rings that cross the antimeridian; with the crop now reaching 174°E, Fiji drew a sliver across the whole map.
-- Chip/pin numbers are the sources.md row (`n = src`) and the build asserts rows 1–36 each appear once, in order; the digest is in row order, not grouped by region.
-- Digest dots skip stories with no place; the map note lists them.
+- New `anchors` band (y 162, 46 px) under the deck: Thanksgiving parade postponed (row 1), 26/11 eighteen years (row 2), chess Game 3 at 15:00 CET (row 7).
+- Leads band moved to y 223 and shrank 256 → 205 px: scenes 108 → 86 px tall (viewBox 236 × 92), headlines 3 → 2 lines. The seconds band and everything below are unchanged.
+- Each lead and card kicker carries its status chip; the source credit sits in the bottom-right corner of its picture (the kicker is too narrow for place + chip + source).
+- The checker reports reading-text and label font sizes separately.

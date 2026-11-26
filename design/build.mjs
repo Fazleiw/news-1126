@@ -9,7 +9,8 @@
 // Type scale, px at 1024 (nothing smaller than 15): 96 date / 34 lead figure / 25 second figure / 21 lead headline /
 // 19 deck / 18 legend / 17 masthead strap, closing line / 16 card headline, digest, lead place / 15 place, numbers, sources.
 import { readFileSync, writeFileSync } from 'node:fs';
-import { giza, tariffs, hodeida, rastanura, nuke, expel, cluster, leak, blast, justice, rubble, bomber } from './artwork.mjs';
+import { macys, mumbai, giza, tariffs, port, refinery, chess, satellite, cluster, nuke, rubble, blast,
+  balloonGlyph, candlesGlyph, knightGlyph } from './artwork.mjs';
 
 const here = new URL('./', import.meta.url);
 const topo = JSON.parse(readFileSync(new URL('data/countries-110m.json', here)));
@@ -25,16 +26,21 @@ const REGION = {
 };
 const REGION_ORDER = Object.keys(REGION);
 const WORLD = INK; // the two stories with no single place (the peace talks, world markets) use an ink chip and have no dot
+// Status chips on the leads and cards, one colour per sources.md code: CONFIRMED the calmest (teal outline), REPORTED
+// neutral (grey outline), ONGOING amber outline, CLAIM the most cautious (solid red).
+const STATUS = { CONFIRMED: '#0B6E7A', REPORTED: MUTE, ONGOING: '#8F5400', CLAIM: ACC };
 
 // ---- page bands (y, px at 1024) ---------------------------------------------------------------
 const W = 1024, M = 20;
-const HEAD_H = 118, DECK_Y = 126, DECK_H = 30, RULE_Y = 163, LEAD_Y = 172, LEAD_H = 256;
+// The date-anchor strip (ANCH) sits under the deck; the leads band gave up its height (scenes 108 -> 86 px, headlines
+// 3 -> 2 lines) so the seconds band and everything below stay where they were.
+const HEAD_H = 118, DECK_Y = 126, DECK_H = 30, ANCH_Y = 162, ANCH_H = 46, RULE_Y = 214, LEAD_Y = 223, LEAD_H = 205;
 const SEC_Y = LEAD_Y + LEAD_H + 12, SEC_ROW = 112, SEC_GAP = 10, SEC_H = 2 * SEC_ROW + SEC_GAP;
 const FOOT_H = 52, FOOT_Y = W - FOOT_H, LOW_Y = SEC_Y + SEC_H + 12, LOW_H = FOOT_Y - 6 - LOW_Y;
 const COL_GAP = 14, COL_W = (W - 2 * M - 3 * COL_GAP) / 4;
 
 // ---- projection (Miller, cropped to where the day's stories are) ------------------------------
-// Widened from the 25 November crop: Middletown, Iowa (9) is at 91°W and Southland, NZ (35) at 46°S, 168°E.
+// Widened from the 25 November crop: Middletown, Iowa (12) is at 91°W and Southland, NZ (34) at 46°S, 168°E.
 const MAP_W = 304, LON0 = -104, LON1 = 174, LAT_TOP = 63, LAT_BOT = -50, K = MAP_W / (LON1 - LON0);
 const miller = (lat) => 1.25 * Math.log(Math.tan(Math.PI / 4 + 0.4 * lat * Math.PI / 180)) * 180 / Math.PI;
 const MAP_H = Math.round((miller(LAT_TOP) - miller(LAT_BOT)) * K);
@@ -77,66 +83,68 @@ for (const g of topo.objects.countries.geometries) {
 
 // ---- illustrations ---------------------------------------------------------------------------
 // The twelve scenes are drawn in artwork.mjs; each story's art: key picks one from these two tables.
-const LEAD_ART = { giza, tariffs, hodeida, rastanura };
-const SPOT = { nuke, expel, cluster, leak, blast, justice, rubble, bomber };
+const LEAD_ART = { macys, mumbai, giza, tariffs };
+const SPOT = { port, refinery, chess, satellite, cluster, nuke, rubble, blast };
 
 // ---- stories ----------------------------------------------------------------------------------
 // src: the row in design/sources.md; the number printed on chips and pins is the row number. fig: the one figure the
 // story leads with. loc: where the pin or dot goes; stories with no single place have none.
+// st: the row's status code. by: who the row says it comes from — the body that confirmed it, the party that claims it,
+// the organiser, or else the publisher of the row's first source; left out where the row names no one (10).
 const LEAD = [
-  { src: 1, art: 'giza', loc: [31.21, 30.1], region: 'Africa', place: 'Giza, Egypt',
-    fig: 'At least 30 dead', hd: 'Fuel tanker overturns and burns on Cairo’s ring road; 15 hurt' },
-  { src: 2, art: 'tariffs', loc: [-77.04, 38.9], region: 'Americas', place: 'Washington',
-    fig: '14 economies', hd: 'US proposes Section 301 tariffs; China capped at 20%' },
-  { src: 3, art: 'hodeida', loc: [42.95, 14.8], region: 'Middle East', place: 'Hodeida, Yemen',
-    fig: 'Jeddah warned', hd: 'Saudi-led strikes hit Hodeida port; Houthis threaten Saudi ports' },
-  { src: 4, art: 'rastanura', loc: [50.16, 26.64], region: 'Middle East', place: 'Ras Tanura',
-    fig: '550,000 bpd', hd: 'Houthis claim hit on Saudi Arabia’s largest refinery; smoke seen' },
+  { src: 1, art: 'macys', loc: [-74.0, 40.71], region: 'Americas', place: 'New York', st: 'CONFIRMED', by: 'NBC',
+    fig: 'Now on Nov 28', hd: 'Macy’s 100th parade postponed, a first' },
+  { src: 2, art: 'mumbai', loc: [72.88, 19.08], region: 'Asia', place: 'Mumbai', st: 'CONFIRMED', by: 'The Hindu',
+    fig: '18 years', hd: 'India remembers the 166 killed in 26/11' },
+  { src: 3, art: 'giza', loc: [31.21, 30.1], region: 'Africa', place: 'Giza, Egypt', st: 'REPORTED', by: 'The Age',
+    fig: 'At least 30 dead', hd: 'Tanker burns on Cairo ring road; 15 hurt' },
+  { src: 4, art: 'tariffs', loc: [-77.04, 38.9], region: 'Americas', place: 'Washington', st: 'CONFIRMED', by: 'USTR',
+    fig: '14 economies', hd: 'US proposes tariffs; China capped at 20%' },
 ];
 const CARDS = [
-  { src: 5, art: 'nuke', loc: [125.75, 39.03], region: 'Asia', place: 'Pyongyang',
-    fig: '“Irreversible”', hd: 'Kim inspects nuclear-material sites, calls for tactical nukes' },
-  { src: 6, art: 'expel', loc: [125.75, 39.03], region: 'Asia', place: 'Pyongyang',
-    fig: '48 hours', hd: 'N Korea expels head of Swiss office over camp sanctions' },
-  { src: 7, art: 'cluster', loc: [30.52, 50.45], region: 'Europe', place: 'Kyiv, Ukraine',
+  { src: 5, art: 'port', loc: [42.95, 14.8], region: 'Middle East', place: 'Hodeida', st: 'REPORTED', by: 'ABS-CBN',
+    fig: 'Port struck', hd: 'Saudi-led coalition hits Hodeida; Houthis threaten Jeddah' },
+  { src: 6, art: 'refinery', loc: [50.16, 26.64], region: 'Middle East', place: 'Ras Tanura', st: 'CLAIM', by: 'Houthis',
+    fig: '550,000 bpd', hd: 'Houthis say they hit Saudi Arabia’s largest refinery; Aramco silent' },
+  { src: 7, art: 'chess', loc: [6.14, 46.2], region: 'Europe', place: 'Geneva', st: 'ONGOING', by: 'FIDE',
+    fig: 'Level 1–1', hd: 'Sindarov has white against Gukesh in Game 3 at 15:00 CET' },
+  { src: 8, art: 'satellite', loc: [-77.04, 38.9], region: 'Americas', place: 'Washington', st: 'CONFIRMED', by: 'FCC',
+    fig: 'Up to 1m', hd: 'FCC authorises SpaceX’s orbital data centres, a first grant' },
+  { src: 9, art: 'cluster', loc: [30.52, 50.45], region: 'Europe', place: 'Kyiv, Ukraine', st: 'REPORTED', by: 'Klitschko',
     fig: 'Mall hit', hd: 'Russia hits Kyiv with cluster munitions just after agreeing to talks' },
-  { src: 8, art: 'leak', loc: [37.62, 55.75], region: 'Europe', place: 'Moscow',
-    fig: '~500,000', hd: 'Leak of Russia’s own data: almost 500,000 soldiers killed' },
-  { src: 9, art: 'blast', loc: [-91.27, 40.83], region: 'Americas', place: 'Middletown, Iowa',
-    fig: '68 drums', hd: 'US Army blows up nearly 5 tons of lead azide; lead-dust warning' },
-  { src: 10, art: 'justice', loc: [35.21, 31.77], region: 'Middle East', place: 'Jerusalem',
-    fig: '1 of 3 cases', hd: 'Judges urge dropping a Netanyahu case and reconsidering another' },
-  { src: 11, art: 'rubble', loc: [34.46, 31.53], region: 'Middle East', place: 'Gaza',
+  { src: 10, art: 'nuke', loc: [125.75, 39.03], region: 'Asia', place: 'Pyongyang', st: 'REPORTED',
+    fig: '“Irreversible”', hd: 'Kim inspects nuclear-material sites, calls for tactical nukes' },
+  { src: 11, art: 'rubble', loc: [34.46, 31.53], region: 'Middle East', place: 'Gaza', st: 'REPORTED', by: 'AP',
     fig: '533+ cases', hd: 'Gaza meningitis, 4 dead; Shati strike kills a Hamas chief' },
-  { src: 12, art: 'bomber', loc: [120.98, 14.6], region: 'Asia', place: 'Manila, Philippines',
-    fig: '170 nmi', hd: 'Philippine military tracks a Chinese H-6 bomber off Luzon' },
+  { src: 12, art: 'blast', loc: [-91.27, 40.83], region: 'Americas', place: 'Iowa', st: 'CONFIRMED', by: 'US Army',
+    fig: '68 drums', hd: 'US Army blows up nearly 5 tons of lead azide; lead-dust warning' },
 ];
 // In row order, so the chip numbers run 13–36 down the columns.
 const DIGEST = [
-  { src: 13, loc: [20.07, 32.12], region: 'Africa', hd: 'Libya: 2 die after frigate drone raid' },
-  { src: 14, loc: [56.25, 26.57], region: 'Middle East', hd: 'Hormuz: IRGC says tanker hit a mine' },
-  { src: 15, loc: [44.21, 15.35], region: 'Middle East', hd: 'Yemen: 364,000 displaced since Aug' },
-  { src: 16, region: 'World', hd: 'Kushner: territory blocks war’s end' },
-  { src: 17, loc: [28.98, 41.01], region: 'Middle East', hd: 'Erdogan wants Ukraine talks in Türkiye' },
-  { src: 18, loc: [-66.1, 18.47], region: 'Americas', hd: 'Puerto Rico’s Barreto is Miss Universe' },
-  { src: 19, region: 'Asia', hd: 'Pakistan’s first astronaut in orbit' },
-  { src: 20, loc: [90.41, 23.81], region: 'Asia', hd: 'Dhaka: garment min. wage up 36%' },
-  { src: 21, loc: [-17.45, 14.69], region: 'Africa', hd: 'CAS restores Senegal’s AFCON title' },
-  { src: 22, region: 'World', hd: 'Stocks fall as new US tariffs loom' },
-  { src: 23, loc: [4.35, 50.85], region: 'Europe', hd: 'EU: Tesla self-drive call on 15 Dec' },
-  { src: 24, loc: [35.2, 31.9], region: 'Middle East', hd: 'Palestine: killing of women, girls soars' },
-  { src: 25, loc: [50.1, 53.2], region: 'Europe', hd: 'Ukraine drones hit 2 Samara refineries' },
-  { src: 26, loc: [34.65, 47.5], region: 'Europe', hd: 'Zaporizhzhia plant off grid, 17th time' },
-  { src: 27, loc: [34.55, 49.59], region: 'Europe', hd: 'Poltava gas site halted; 5 regions dark' },
-  { src: 28, loc: [21.01, 52.23], region: 'Europe', hd: 'NATO gives Poland an AWACS plane' },
-  { src: 29, loc: [77.21, 28.61], region: 'Asia', hd: 'Dalai Lama given a Delhi bungalow' },
-  { src: 30, region: 'Asia', hd: 'India at UN: terrorists are using AI' },
-  { src: 31, loc: [15.27, -4.32], region: 'Africa', hd: 'Congo reimposes full cobalt ban' },
-  { src: 32, loc: [7.49, 9.06], region: 'Africa', hd: 'Nigeria: AI disinformation mars vote' },
-  { src: 33, loc: [45.34, 2.05], region: 'Africa', hd: 'Somalia: Baidoa famine risk eases' },
-  { src: 34, loc: [6.14, 46.2], region: 'Europe', hd: 'UN: AIDS gains at risk as funding falls' },
-  { src: 35, loc: [168.35, -46.41], region: 'Oceania', hd: 'Meridian takes 11.27% of Datagrid' },
-  { src: 36, loc: [37.8, 48.0], region: 'Europe', hd: 'Russia nets 39 sq mi in four weeks' },
+  { src: 13, loc: [37.62, 55.75], region: 'Europe', hd: 'Leak: almost 500,000 Russian dead' },
+  { src: 14, loc: [35.21, 31.77], region: 'Middle East', hd: 'Judges: drop one Netanyahu case' },
+  { src: 15, loc: [120.98, 14.6], region: 'Asia', hd: 'China’s H-6 170 nmi from Manila' },
+  { src: 16, loc: [125.75, 39.03], region: 'Asia', hd: 'N Korea expels Swiss office head' },
+  { src: 17, loc: [20.07, 32.12], region: 'Africa', hd: 'Libya: 2 die after frigate drone raid' },
+  { src: 18, loc: [56.25, 26.57], region: 'Middle East', hd: 'Hormuz: IRGC says tanker hit a mine' },
+  { src: 19, loc: [44.21, 15.35], region: 'Middle East', hd: 'Yemen: 364,000 displaced since Aug' },
+  { src: 20, region: 'World', hd: 'Kushner: territory blocks war’s end' },
+  { src: 21, loc: [28.98, 41.01], region: 'Europe', hd: 'Erdogan wants Ukraine talks in Türkiye' },
+  { src: 22, loc: [35.2, 31.9], region: 'Middle East', hd: 'Palestine: killing of women, girls soars' },
+  { src: 23, loc: [50.1, 53.2], region: 'Europe', hd: 'Ukraine drones hit 2 Samara refineries' },
+  { src: 24, loc: [34.65, 47.5], region: 'Europe', hd: 'Zaporizhzhia plant off grid, 17th time' },
+  { src: 25, loc: [34.55, 49.59], region: 'Europe', hd: 'Poltava gas site halted; 5 regions dark' },
+  { src: 26, loc: [21.01, 52.23], region: 'Europe', hd: 'NATO gives Poland an AWACS plane' },
+  { src: 27, loc: [4.35, 50.85], region: 'Europe', hd: 'EU: Tesla self-drive call on 15 Dec' },
+  { src: 28, loc: [139.69, 35.69], region: 'Asia', hd: 'Kioxia shows 3rd-gen XL-FLASH for AI' },
+  { src: 29, loc: [91.74, 26.14], region: 'Asia', hd: 'Airtel plans 3 Assam data centres' },
+  { src: 30, loc: [15.27, -4.32], region: 'Africa', hd: 'Congo reimposes full cobalt ban' },
+  { src: 31, loc: [7.49, 9.06], region: 'Africa', hd: 'Nigeria: AI disinformation mars vote' },
+  { src: 32, loc: [45.34, 2.05], region: 'Africa', hd: 'Somalia: Baidoa famine risk eases' },
+  { src: 33, region: 'World', hd: 'Stocks fall as new US tariffs loom' },
+  { src: 34, loc: [168.35, -46.41], region: 'Oceania', hd: 'Meridian takes 11.27% of Datagrid' },
+  { src: 35, loc: [37.8, 48.0], region: 'Europe', hd: 'Russia nets 39 sq mi in four weeks' },
+  { src: 36, loc: [6.14, 46.2], region: 'Europe', hd: 'WIPO report on deep-science patents' },
 ];
 // The number on every chip, pin and dot is the sources.md row, so the page and the source list cannot drift apart.
 const ALL = [...LEAD, ...CARDS, ...DIGEST];
@@ -144,14 +152,14 @@ ALL.forEach((s) => { s.n = s.src; });
 const FEATURED = LEAD.length + CARDS.length;
 if (ALL.length !== 36 || ALL.some((s, i) => s.src !== i + 1)) throw new Error('every sources.md row must appear exactly once, in order');
 for (const s of ALL) if (!REGION[s.region] && s.region !== 'World') throw new Error('unknown region ' + s.region);
+for (const s of [...LEAD, ...CARDS]) if (!STATUS[s.st]) throw new Error('story ' + s.src + ' has no status code');
 const tally = REGION_ORDER.map((r) => [r, ALL.filter((s) => s.region === r).length]);
 const color = (s) => REGION[s.region] ?? WORLD;
 const byRow = Object.fromEntries(ALL.map((s) => [s.src, s]));
 
 // ---- map pins ---------------------------------------------------------------------------------
 // Featured stories get a numbered pin in their region colour; off:[dx, dy] moves a crowded pin and draws a tick back.
-const PIN_OFF = { 1: [-10, 16], 3: [1.3, 6.3], 4: [11, -4], 5: [-8, -5], 6: [12, -3], 7: [-9, -2], 8: [7, -2], 9: [-3, -3],
-  2: [1.5, 5], 10: [6, -11], 11: [-15.4, -2.4] };
+const PIN_OFF = { 12: [-3, -5], 1: [1, -15], 4: [0, 14], 8: [20, 3], 11: [-1.5, -4.5], 3: [-10, 14], 5: [1.3, 6.3], 6: [3.5, -4.5] };
 const PIN = 18, PH = PIN / 2;
 const f1 = (v) => +v.toFixed(1);
 const geo = { pins: [] };
@@ -174,17 +182,20 @@ for (const s of [...LEAD, ...CARDS]) {
 // ---- render -----------------------------------------------------------------------------------
 const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;');
 const num = (s) => `<span class="nb" style="background:${color(s)}"><i>${s.n}</i></span>`;
-const kicker = (s) => `<div class="kick">${num(s)}<span class="pc">${esc(s.place)}</span></div>`;
+const chip = (s) => `<span class="st" style="--c:${STATUS[s.st]}"${s.st === 'CLAIM' ? ' data-solid' : ''}><i>${s.st}</i></span>`;
+const kicker = (s) => `<div class="kick">${num(s)}<span class="pc">${esc(s.place)}</span>${chip(s)}</div>`;
+const pic = (s, svg) => `<div class="pic">${svg}${s.by ? `<span class="cr"><i>${esc(s.by)}</i></span>` : ''}</div>`;
 
 const leads = LEAD.map((s) => `
-<article class="lead">${kicker(s)}${LEAD_ART[s.art]()}<div class="fig">${esc(s.fig)}</div><h2 class="hd">${esc(s.hd)}</h2></article>`).join('');
+<article class="lead">${kicker(s)}${pic(s, LEAD_ART[s.art]())}<div class="fig">${esc(s.fig)}</div><h2 class="hd">${esc(s.hd)}</h2></article>`).join('');
 const cards = CARDS.map((s) => `
-<article class="card">${kicker(s)}<div class="cb">${SPOT[s.art]()}<div class="tx"><div class="fig2">${esc(s.fig)}</div><h3 class="h3">${esc(s.hd)}</h3></div></div></article>`).join('');
+<article class="card">${kicker(s)}<div class="cb">${pic(s, SPOT[s.art]())}<div class="tx"><div class="fig2">${esc(s.fig)}</div><h3 class="h3">${esc(s.hd)}</h3></div></div></article>`).join('');
 const digest = DIGEST.map((s) => `
 <li>${num(s)}<span class="di">${esc(s.hd)}</span></li>`).join('');
 const worldN = ALL.filter((s) => s.region === 'World').length;
 const legend = [...tally, ...(worldN ? [['World', worldN]] : [])]
   .map(([r, c]) => `<span class="lg"><b style="background:${REGION[r] ?? WORLD}"></b>${r} ${c}</span>`).join('');
+const anchor = (glyph, head, line) => `<div class="an">${glyph}<div><b>${esc(head)}</b><span>${esc(line)}</span></div></div>`;
 const teaser = (row, text) => `<span class="ts">${num(byRow[row])}<span>${esc(text)}</span></span>`;
 
 // Layout checker (CHECK=1 only): measures the laid-out page, writes a JSON report into document.title.
@@ -207,9 +218,9 @@ const room=(sel)=>{let mn=1e9;document.querySelectorAll(sel).forEach(e=>{const b
 out.push('inner room (min, px): lead '+room('.lead')+' | card text '+room('.tx')+' | map col '+room('.map')+' | digest col '+room('.also'));
 G.pins.forEach((a,i)=>G.pins.slice(i+1).forEach(b=>Math.abs(a.x-b.x)<2*R+1&&Math.abs(a.y-b.y)<2*R+1&&out.push('PINS overlap '+a.n+'/'+b.n)));
 G.pins.forEach(p=>(p.x<R||p.y<R||p.x>${MAP_W}-R||p.y>${MAP_H}-R)&&out.push('PIN off map '+p.n));
-const sz=new Set();html.forEach(e=>{if([...e.childNodes].some(n=>n.nodeType===3&&n.textContent.trim()))sz.add(parseFloat(getComputedStyle(e).fontSize))});
+const sz=new Set(),lab=new Set();html.forEach(e=>{if([...e.childNodes].some(n=>n.nodeType===3&&n.textContent.trim()))(e.closest('.st,.cr')?lab:sz).add(parseFloat(getComputedStyle(e).fontSize))});
 document.querySelectorAll('svg text').forEach(e=>sz.add(parseFloat(getComputedStyle(e).fontSize)));
-const s=[...sz].sort((a,b)=>a-b);out.push('font sizes '+s.join(','));out.push('min font '+s[0]+' px');
+const s=[...sz].sort((a,b)=>a-b);out.push('font sizes '+s.join(','));out.push('min font '+s[0]+' px (reading text)');out.push('label font '+[...lab].join(',')+' px (status chips, source credits)');
 out.push(out.some(l=>/^(CLIP|OVERLAP|OFF|PINS|PIN )/.test(l))?'RESULT: problems above':'RESULT: no clipping, no overlap');
 document.title=JSON.stringify(out);
 }catch(e){document.title=JSON.stringify(['checker error: '+e.message])}</script>`;
@@ -238,12 +249,24 @@ h1{font:700 96px/1 ${DATE};white-space:nowrap;padding-bottom:12px;text-box:trim-
 .lead .pc{font-size:16px}
 .leads{top:${LEAD_Y}px;height:${LEAD_H}px;display:grid;grid-template-columns:repeat(4,1fr);column-gap:${COL_GAP}px}
 .lead,.card{display:flex;flex-direction:column;overflow:hidden;min-width:0}
-.lead>svg{display:block;width:100%;height:108px;flex:none;margin-top:6px}
-.fig{font:800 34px/38px ${COND};color:${ACC};margin-top:3px;white-space:nowrap;letter-spacing:-.005em}
+.pic{position:relative;flex:none}
+.pic>svg{display:block;width:100%;height:100%}
+.lead>.pic{height:86px;margin-top:5px}
+.cr{position:absolute;right:0;bottom:0;background:${INK};color:${PAPER};padding:3px 4px;font:700 11px/1 ${COND};letter-spacing:.06em;text-transform:uppercase;white-space:nowrap}
+.st{flex:none;padding:3px 4px;border:1px solid var(--c);color:var(--c);font:700 11px/1 ${COND};letter-spacing:.06em;white-space:nowrap}
+.st[data-solid]{background:var(--c);color:#fff}
+.anchors{top:${ANCH_Y}px;height:${ANCH_H}px;display:grid;grid-template-columns:repeat(3,1fr);background:${PANEL}}
+.an{display:flex;align-items:center;gap:10px;padding:0 12px;min-width:0}
+.an+.an{border-left:3px solid ${PAPER}}
+.an>svg{width:38px;height:38px;flex:none}
+.an div{display:flex;flex-direction:column;min-width:0;white-space:nowrap}
+.an b{font:800 16px/18px ${SANS};letter-spacing:.05em;text-transform:uppercase;color:${ACC}}
+.an span{font:600 16px/18px ${SANS}}
+.fig{font:800 34px/38px ${COND};color:${ACC};margin-top:2px;white-space:nowrap;letter-spacing:-.005em}
 .hd{font:700 21px/24px ${SANS};letter-spacing:-.012em}
 .secs{top:${SEC_Y}px;height:${SEC_H}px;display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:repeat(2,${SEC_ROW}px);gap:${SEC_GAP}px ${COL_GAP}px}
 .cb{display:flex;gap:8px;margin-top:5px;flex:1;min-height:0}
-.cb>svg{display:block;width:78px;height:78px;flex:none}
+.cb>.pic{width:78px;height:78px}
 .tx{flex:1;min-width:0;display:flex;flex-direction:column;overflow:hidden}
 .fig2{font:800 25px/26px ${COND};color:${ACC};white-space:nowrap;margin-top:-3px}
 .h3{font:600 16px/18px ${COND};margin-top:1px}
@@ -269,7 +292,8 @@ h1{font:700 96px/1 ${DATE};white-space:nowrap;padding-bottom:12px;text-box:trim-
 </style></head><body>
 <header class="head" data-b="head"><div class="strap"><span><b>What happened in the world on Thursday</b></span><span>${ALL.length} stories · five continents</span></div>
 <h1>THURSDAY 26 NOVEMBER 2026</h1></header>
-<div class="deck" data-b="deck">${teaser(1, 'Giza tanker fire: at least 30 dead')}${teaser(2, 'US tariffs on 14 economies')}${teaser(3, 'Saudi strikes hit Hodeida port')}</div>
+<div class="deck" data-b="deck">${teaser(3, 'Giza tanker fire: at least 30 dead')}${teaser(4, 'US tariffs on 14 economies')}${teaser(6, 'Houthis claim Saudi refinery hit')}</div>
+<div class="anchors" data-b="anchors">${anchor(balloonGlyph(), 'Thanksgiving', 'The 100th parade, postponed')}${anchor(candlesGlyph(), '26/11', 'Eighteen years')}${anchor(knightGlyph(), 'Chess', 'Game 3, 15:00 CET')}</div>
 <div class="rule"></div>
 <section class="leads" data-b="leads">${leads}</section>
 <section class="secs" data-b="seconds">${cards}</section>
@@ -284,7 +308,7 @@ ${dots}${ticks}${pins}</svg>
 </section>
 <footer class="foot" data-b="foot">
 <div class="c1"><b>Thursday 26 November 2026.</b> The day’s world news in ${ALL.length} stories, each traced to a named report.</div>
-<div class="c2">Sources: AP, Reuters, Al Jazeera, UN News, ABS-CBN, The Age, Philstar, TRT World, India Today, Anadolu, DW · Map: Natural Earth</div>
+<div class="c2">Sources: AP, Reuters, NBC, The Hindu, The Guardian, FIDE, ABS-CBN, The Age, UN News, TRT World, DW, WIPO · Map: Natural Earth</div>
 </footer>
 ${checker}
 </body></html>`;
