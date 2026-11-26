@@ -2,3 +2,6 @@ out/
 node_modules/
 *.jsonl
 *.err
+design/atlas.html
+design/shot.png
+design/shot300.png
